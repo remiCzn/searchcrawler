@@ -2,5 +2,11 @@ package main
 
 func main() {
 	crawler := initCrawler()
-	crawler.step()
+
+	for i := 0; i < 20; i++ {
+		crawler.step()
+	}
+
+	crawler.printStats()
+
 }

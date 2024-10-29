@@ -10,15 +10,18 @@ import (
 )
 
 type Crawler struct {
-	visited     map[string]bool
-	waitingList []string
-	site        string
+	visited       map[string]bool
+	waitingList   []string
+	site          string
+	robotsChecker *RobotChecker
 }
 
 func initCrawler() *Crawler {
 	c := Crawler{}
-	c.waitingList = []string{"https://fr.wikipedia.org/", "https://www.lemonde.fr/"}
+	c.waitingList = []string{"https://membre.leadersante-groupe.fr/"}
 	c.visited = map[string]bool{}
+	c.robotsChecker = &RobotChecker{}
+	c.robotsChecker.init()
 	for _, el := range c.waitingList {
 		c.visited[el] = true
 	}
@@ -27,11 +30,19 @@ func initCrawler() *Crawler {
 }
 
 func (c *Crawler) step() {
-	c.site, c.waitingList = c.waitingList[0], c.waitingList[:1]
+	c.site = c.waitingList[0]
+	c.waitingList = c.waitingList[1:]
+
+	max := len(c.waitingList)
+	if max > 5 {
+		max = 5
+	}
+
 	c.crawl()
 }
 
 func (c *Crawler) crawl() {
+	fmt.Println("Crawling:", c.site)
 	res, err := http.Get(c.site)
 	if err != nil {
 		log.Fatal(err)
@@ -50,20 +61,33 @@ func (c *Crawler) crawl() {
 	u, _ := url.Parse(c.site)
 	baseUri := fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 
-	doc.Find("a").Each(func(i int, s *goquery.Selection) {
+	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
 		link, exists := s.Attr("href")
 
 		if exists {
-			u, _ := url.Parse(link)
+			fmt.Println(link)
+
+			u, err := url.Parse(link)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
 			if u.Host == "" {
 				link = fmt.Sprintf("%s%s", baseUri, link)
 			}
 			_, ok := c.visited[link]
 			if !ok {
-				fmt.Println(link)
 				c.visited[link] = true
-				c.waitingList = append(c.waitingList, link)
+
+				if c.robotsChecker.checkIfAllowed(link) {
+					c.waitingList = append(c.waitingList, link)
+				}
 			}
 		}
 	})
+}
+
+func (c *Crawler) printStats() {
+	fmt.Print("Sites checked:", len(c.visited), "\n Remaining sites:", len(c.waitingList), "\n")
 }
