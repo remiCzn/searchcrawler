@@ -55,7 +55,14 @@ func (r *RobotChecker) checkIfAllowed(_url string) bool {
 
 	}
 
+	if robot == nil {
+		return false
+	}
+
 	group := robot.FindGroup("SearchCrawler Bot")
+	if group == nil {
+		return false
+	}
 	allowed := group.Test(rest)
 
 	return allowed

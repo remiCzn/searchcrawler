@@ -112,7 +112,7 @@ func (c *Crawler) addUriToWaitingList(link string) {
 		return
 	}
 
-	fmt.Println(path)
+	fmt.Println(fmt.Sprintf("%s%s", baseUrl, path))
 
 	err := c.db.AddPage(baseUrl, path)
 

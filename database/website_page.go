@@ -61,6 +61,14 @@ func (db *Database) GetNextPageToVisit() *CrawlableWebsitePage {
 }
 
 func (db *Database) SetPageVisited(id int) error {
-	_, err := db.conn.Exec(`UPDATE website_page SET visited = true WHERE id = $1`, id)
-	return err
+	_, err1 := db.conn.Exec(`UPDATE website_page SET visited = true WHERE id = $1`, id)
+
+	if err1 != nil {
+		return err1
+	}
+
+	_, err2 := db.conn.Exec(`UPDATE website 
+				SET visited_last_time = NOW()
+				WHERE id = (SELECT wp.website_id FROM website_page wp WHERE wp.id = $1);`, id)
+	return err2
 }

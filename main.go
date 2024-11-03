@@ -11,7 +11,7 @@ func main() {
 
 	crawler := initCrawler()
 
-	for i := 0; i < 20; i++ {
+	for {
 		crawler.step()
 	}
 
