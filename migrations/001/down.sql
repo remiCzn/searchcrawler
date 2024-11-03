@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS website;
+DROP TABLE IF EXISTS website_page;

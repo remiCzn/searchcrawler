@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS website (
+    id SERIAL PRIMARY KEY,
+    base_url VARCHAR(2047) NOT NULL,
+    visited_last_time TIMESTAMP NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    lang VARCHAR(15) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS website_page (
+    id SERIAL PRIMARY KEY,
+    website_id INT NOT NULL,
+    path VARCHAR(511) NOT NULL,
+    visited BOOLEAN NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    title VARCHAR(2047) NULL,
+    FOREIGN KEY (website_id) REFERENCES website(id)
+);
